@@ -3,8 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        function allHome() {
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/api/cities",
+                success: function (hi) {
+                    console.log(hi)
+                    displayHome(hi)
+                }
+            })
+        }
+
+        function displayHome(cities) {
+            let res = "";
+            res += `<table border="1" cellpadding="5">
+<H1>danh sách thành phố</H1>
+                <tr>
+                    <th>city</th>
+                    <th>country</th>
+                    <th colspan="3">Action</th>
+                </tr>`
+            for (let i = 0; i < cities.length; i++) {
+                res += `<tr>
+                    <td> ${cities[i].name}</td>
+                    <td> ${cities[i].country.name}</td>
+                    <td><button onclick="viewHome(${cities[i].id})">View</button></td>
+                    <td><button onclick="showFormEditHome(${cities[i].id})">Edit</button></td>
+                    <td><button onclick="deleteHome(${cities[i].id})">Delete</button></td>
+                        </tr>`
+            }
+            res += `</table>`
+            document.getElementById("display").innerHTML = res;
+        }
+
+        function formCreate() {
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/api/countries",
+                success: function (country) {
+                    console.log(country);
+                    let form = `<table cellpadding="5">
+      <tr>
+                                <th>name: </th>
+                                <td><input type="text" id="name"></td>
+                            </tr>
+                             <tr>
+                                <th>acreage: </th>
+                                <td><input type="text" id="acreage"></td>
+                            </tr>
+                            <tr>
+                                <th>population: </th>
+                                <td><input type="text" id="population"></td>
+                            </tr>
+                              <tr>
+                                <th>gdp: </th>
+                                <td><input type="text" id="gdp"></td>
+                            </tr>
+                               <tr>
+                                <th>description: </th>
+                                <td><input type="text" id="description"></td>
+                            </tr>
+                            <tr>
+                                <th>country: </th>
+                                <td>
+                                    <select id="country">`
+                    for (let i = 0; i < country.length; i++) {
+                        form += `<option value="${country[i].id}">${country[i].name}</option>`
+                    }
+                    form += `</select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <td><button onclick="saveHome()">Save</button></td>
+                            </tr>
+                        </table>`;
+                    document.getElementById("display").innerHTML = form;
+                }
+            })
+        }
+
+        function saveHome() {
+            let country = {
+                "name": document.getElementById("name").value,
+                "name": document.getElementById("acreage").value,
+                "name": document.getElementById("population").value,
+                "name": document.getElementById("gdp").value,
+                "name": document.getElementById("description").value,
+                "country": {
+                    "id": document.getElementById("country").value,
+                }
+            }
+            console.log(country)
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                type: "POST",
+                url: "http://localhost:8080/api/cities",
+                data: JSON.stringify(country),
+                success: function () {
+                    alert("Thêm Thành Công")
+                    allHome();
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+            })
+        }
+
+
+        function deleteHome(id) {
+            if (confirm("Are you sure")) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "http://localhost:8080/api/cities/" + id,
+                    success: function (country) {
+                        allHome(country)
+                    },
+                    error: function (error) {
+                    }
+                })
+            }
+        }
+
+
+        function viewHome(id) {
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/api/cities/" + id,
+                success: function (country) {
+                    console.log(country)
+                    let view = `<table cellpadding="5">
+                                    <tr>
+                                        <th>name: </th>
+                                        <td>${country.name}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>category: </th>
+                                        <td>${country.acreage}</td>
+                                    </tr>\
+                                      <tr>
+                                        <th>category: </th>
+                                        <td>${country.population}</td>
+                                    </tr>
+                                      <tr>
+                                        <th>category: </th>
+                                        <td>${country.gdp}</td>
+                                    </tr>
+                                        <tr>
+                                        <th>category: </th>
+                                        <td>${country.description}</td>
+                                    </tr>
+                                      <tr>
+                                        <th>category: </th>
+                                        <td>${country.country.name}</td>
+                                    </tr>
+                                </table>`;
+                    console.log(view)
+                    document.getElementById("display").innerHTML = view;
+                }
+            })
+        }
+
+
+        function showFormEditHome(id) {
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/api/cities/" + id,
+                success: function (city) {
+                    console.log(city)
+                    $.ajax({
+                        type: "GET",
+                        url: "http://localhost:8080/api/countries",
+                        success: function (country) {
+                            console.log(country)
+                            let form =
+                                "<p>name</p>" + `<input type="text" id="name" value="${city.name}">\n` + "<br>" +
+                                "<p>acreage</p>" + `<input type="text" id="acreage" value="${city.acreage}">\n` + "<br>" +
+                                "<p>population</p>" + `<input type="text" id="population" value="${city.population}">\n` + "<br>" +
+                                "<p>gdp</p>" + `<input type="text" id="gdp" value="${city.gdp}">\n` + "<br>" +
+                                "<p>description</p>" + `<input type="text" id="description" value="${city.description}">\n` + "<br>" +
+                                "<p>country</p>" + `<select  id="country">
+                                 <option value="${city.country.id}"> ${city.country.name}</option>`
+                            for (let i = 0; i < country.length; i++) {
+                                form += `<option value="${country[i].id}">${country[i].name}</option>`
+                            }
+                            form += `</select>`
+                                + `<button onclick="updateHome(${city.id})">Thay đổi</button>`
+                            console.log(form)
+                            document.getElementById("display").innerHTML = form;
+                        }
+                    })
+                }
+            })
+        }
+
+
+        function updateHome(id) {
+            let name = document.getElementById("name").value;
+            let acreage = document.getElementById("acreage").value;
+            let population = document.getElementById("population").value;
+            let gdp = document.getElementById("gdp").value;
+            let description = document.getElementById("description").value;
+            let country = document.getElementById("country").value;
+            let home = {
+                id: id,
+                name: name,
+                acreage: acreage,
+                population: population,
+                gdp: gdp,
+                description: description,
+                country: {
+                    id: country
+                }
+            }
+            console.log(home)
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                type: "PUT",
+                url: "http://localhost:8080/api/cities/" + id,
+                data: JSON.stringify(home),
+                success: function (hí) {
+                    allHome(hí)
+                    alert("xong")
+                },
+                error: function (error) {
+                }
+            })
+        }
+
+
+    </script>
 </head>
 <body>
+<button onclick="allHome()">show post</button>
+<button onclick="formCreate()">add</button>
+<div id="display"></div>
 
 </body>
 </html>
